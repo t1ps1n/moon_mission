@@ -1,0 +1,52 @@
+version: "3"
+services:
+
+  postgres:
+    image: library/postgres:14-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: robot
+    ports:
+      - 5432:5432
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robot_api:latest
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_DSN: "postgresql+asyncpg://user:password@postgres:5432/robot"
+    command: alembic upgrade head
+
+  robot_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robot_api:latest
+    depends_on:
+      - postgres
+      - migrate
+    environment:
+      POSTGRES_DSN: "postgresql+asyncpg://user:password@postgres:5432/robot"
+      START_POSITION: "4,2"
+      START_DIRECTION: "W"
+      API_TOKEN: "my-secret-token"
+    ports:
+      - 8000:8000
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: scheduler:latest
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_DSN: "postgresql+asyncpg://user:password@postgres:5432/robot"
+      START_POSITION: "4,2"
+      START_DIRECTION: "W"
+    command: ["python", "scheduler.py"]
