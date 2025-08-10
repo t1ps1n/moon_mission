@@ -6,8 +6,7 @@ from settings import API_TOKEN
 
 def get_status():
     r = requests.get(
-        "http://127.0.0.1:8000/status",
-        headers={"Authorization": f"Bearer {API_TOKEN}"}
+        "http://127.0.0.1:8000/status", headers={"Authorization": f"Bearer {API_TOKEN}"}
     )
 
     assert r.status_code == 200
@@ -38,10 +37,10 @@ def create_command(command):
 def test_commands_execution():
     # 1. Check the robot's initial state
     status = get_status()
-    assert status["x"] == 4              # initial X coordinate
-    assert status["y"] == 2              # initial Y coordinate
-    assert status["direction"] == "W"    # facing West
-    assert status["status"] == "C"       # status: waiting for commands
+    assert status["x"] == 4  # initial X coordinate
+    assert status["y"] == 2  # initial Y coordinate
+    assert status["direction"] == "W"  # facing West
+    assert status["status"] == "C"  # status: waiting for commands
     assert status["command_id"] is None  # no active command
 
     # 2. Send the first command: move forward 4 steps
@@ -53,10 +52,10 @@ def test_commands_execution():
 
     # 4. Check state after executing the first command
     status = get_status()
-    assert status["x"] == 0               # moved 4 cells to the West
-    assert status["y"] == 2               # Y coordinate unchanged
-    assert status["direction"] == "W"     # still facing West
-    assert status["status"] == "C"        # back to idle
+    assert status["x"] == 0  # moved 4 cells to the West
+    assert status["y"] == 2  # Y coordinate unchanged
+    assert status["direction"] == "W"  # still facing West
+    assert status["status"] == "C"  # back to idle
     assert status["command_id"] == command_id  # matches the executed command
 
     # 5. Send the second command: move forward 4 steps
@@ -68,20 +67,20 @@ def test_commands_execution():
 
     # 7. Check state after executing the second command
     status = get_status()
-    assert status["x"] == -4              # moved another 4 cells to the West
-    assert status["y"] == 2               # Y coordinate unchanged
-    assert status["direction"] == "W"     # still facing West
-    assert status["status"] == "C"        # back to idle
+    assert status["x"] == -4  # moved another 4 cells to the West
+    assert status["y"] == 2  # Y coordinate unchanged
+    assert status["direction"] == "W"  # still facing West
+    assert status["status"] == "C"  # back to idle
     assert status["command_id"] == command_id  # matches the second command
 
 
 def test_face_obstacle():
     # 1. Check the robot's initial state
     status = get_status()
-    assert status["x"] == 4              # initial X coordinate
-    assert status["y"] == 2              # initial Y coordinate
-    assert status["direction"] == "W"    # facing West
-    assert status["status"] == "C"       # status: waiting for commands
+    assert status["x"] == 4  # initial X coordinate
+    assert status["y"] == 2  # initial Y coordinate
+    assert status["direction"] == "W"  # facing West
+    assert status["status"] == "C"  # status: waiting for commands
     assert status["command_id"] is None  # no active command
 
     # 2. Send the first command: move forward 3 steps, turn right, move forward 2 steps
@@ -94,10 +93,10 @@ def test_face_obstacle():
 
     # 4. Check state after facing the obstacle
     status = get_status()
-    assert status["x"] == 1               # stopped at X=1
-    assert status["y"] == 3               # moved to Y=3
-    assert status["direction"] == "N"     # now facing North
-    assert status["status"] == "F"        # status: failure/obstacle detected
+    assert status["x"] == 1  # stopped at X=1
+    assert status["y"] == 3  # moved to Y=3
+    assert status["direction"] == "N"  # now facing North
+    assert status["status"] == "F"  # status: failure/obstacle detected
     assert status["command_id"] == command_id  # matches the command that failed
 
     # 5. Send the second command: turn left, move forward 3 steps
@@ -110,11 +109,13 @@ def test_face_obstacle():
 
     # 7. Check state after successfully executing the second command
     status = get_status()
-    assert status["x"] == -2              # moved further West
-    assert status["y"] == 3               # Y coordinate unchanged
-    assert status["direction"] == "W"     # facing West again
-    assert status["status"] == "C"        # status: waiting for commands
-    assert status["command_id"] == command_id  # matches the successfully executed command
+    assert status["x"] == -2  # moved further West
+    assert status["y"] == 3  # Y coordinate unchanged
+    assert status["direction"] == "W"  # facing West again
+    assert status["status"] == "C"  # status: waiting for commands
+    assert (
+        status["command_id"] == command_id
+    )  # matches the successfully executed command
 
 
 if __name__ == "__main__":
