@@ -43,18 +43,27 @@ Commands are broken down into individual actions and processed stepwise by dedic
 ---
 
 ## Workflow
+**Command Submission & Persistence:**
+The client sends a command (a sequence of actions). The application stores it in the database and returns a unique command ID. The command is queued for later processing — avoiding long-lived HTTP connections and improving fault tolerance.
 
-1. **Command Submission:**
-   Client sends a command (sequence of actions) via API.
+**Command Parsing:**
+A dedicated worker retrieves queued commands, splits them into individual actions, and saves these in the database. This is done within a single transaction, ensuring either all actions are stored or none at all (atomicity).
 
-2. **Persistence:**
-   API stores the command in the database and returns a unique command ID.
+**Action Execution:**
+Another worker processes the actions in order and sends them to the robot.
+If an obstacle is encountered, remaining actions in the command are marked WITHDRAWN to prevent the robot from getting stuck and to allow for re-planning.
 
-3. **Parsing:**
-   Parsing worker retrieves the command, splits it into individual actions, and saves them.
 
-4. **Execution:**
-   Execution worker fetches actions and sends them to the robot hardware.
+## Implementation Logic and Design Rationale
+This system’s architecture is driven by two critical factors:
+
+- **We cannot keep HTTP connections open for a long time.**
+
+   Executing commands synchronously during an HTTP request is not feasible due to possible timeouts and connection interruptions.
+
+- **The system must maintain up-to-date robot position data across restarts.**
+
+   Whether during planned restarts or unexpected shutdowns (e.g., power loss), the robot’s state must be preserved to avoid data loss and ensure smooth continuation.
 
 ---
 
