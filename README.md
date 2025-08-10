@@ -10,8 +10,9 @@ Asynchronous command processing system to control a robot by executing sequences
 * [System Architecture](#system-architecture)
 * [Technology Stack](#technology-stack)
 * [Workflow](#workflow)
-* [API Endpoints](#api-endpoints)
+* [Implementation Logic and Design Logic](#implementation-logic-and-design-logic)
 * [Authentication](#authentication)
+* [API Endpoints](#api-endpoints)
 * [Getting Started](#getting-started)
 
 ---
@@ -54,7 +55,7 @@ Another worker processes the actions in order and sends them to the robot.
 If an obstacle is encountered, remaining actions in the command are marked WITHDRAWN to prevent the robot from getting stuck and to allow for re-planning.
 
 
-## Implementation Logic and Design Rationale
+## Implementation Logic and Design Logic
 This system’s architecture is driven by two critical factors:
 
 - **We cannot keep HTTP connections open for a long time.**
